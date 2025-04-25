@@ -38,6 +38,43 @@ model_context_protocol/
 
 ---
 
+## Placement: Add to Root of Your App Folder
+
+For MCP to automatically detect and integrate with your FastAPI application, you must place the `model_context_protocol` directory at the **root of your FastAPI app folder** (typically where your main FastAPI app module lives, e.g., `app/`).
+
+- This ensures that `server.py` can correctly locate and import your FastAPI app (e.g., `app.api.main:app`).
+- If you move the `model_context_protocol` folder, update the import paths in `server.py` accordingly.
+
+**Example Structure:**
+
+```
+app/
+├── api/
+│   └── main.py    # <-- Your FastAPI app instance (app = FastAPI(...))
+├── model_context_protocol/
+│   ├── server.py
+│   └── ...
+```
+
+**Why?**
+- The MCP server relies on relative imports to dynamically integrate with your FastAPI app.
+- Placing `model_context_protocol` at the app root ensures seamless OpenAPI and MCP integration.
+
+---
+
+## Getting Started
+
+1. **Add this directory (`model_context_protocol/`) to the root of your FastAPI app folder.**
+   - This is required for automatic discovery and integration (see directory structure example above).
+   - Your FastAPI app instance should be importable as `app.api.main:app` by default.
+2. **Install requirements:**
+   - Python 3.9+
+   - `fastapi`, `fastmcp`, and all dependencies listed in your environment.
+3. **Run the MCP server:**
+   - Use `python model_context_protocol/server.py` or `fastmcp run model_context_protocol/server.py`.
+
+---
+
 ## How Integration Works
 
 ### 1. **FastAPI + FastMCP**
@@ -60,6 +97,18 @@ model_context_protocol/
 
 ---
 
+## Advanced Usage & Features
+- For advanced features, integration patterns, and full reproducibility examples, **see [`_docs/context_integration_examples.md`](./_docs/context_integration_examples.md)**.
+- Highlights include:
+  - **LLM Sampling:** Use `await ctx.sample(...)` in tools/resources to request completions from the client LLM.
+  - **Progress Reporting:** Use `await ctx.report_progress(current, total)` for long-running tasks.
+  - **Multi-message Prompts:** Return a list of `UserMessage`/`AssistantMessage` in prompt modules for richer LLM guidance.
+  - **Dynamic Resources & Pydantic Inputs:** See `_docs` for examples on dynamic resource templates and complex tool schemas.
+  - **Server Composition/Proxy:** See example modules for mounting or proxying other MCP servers.
+  - **Integration/E2E Testing:** Full test scripts and usage instructions are documented in `_docs`.
+
+---
+
 ## Example: Adding a New Tool
 
 1. Create a new file in `tools/image/`, e.g. `resize_tool.py`:
@@ -76,20 +125,6 @@ model_context_protocol/
 
 ---
 
-## Advanced Usage
-- **LLM Sampling:** Use `await ctx.sample(...)` in tools/resources to request completions from the client LLM.
-- **Progress Reporting:** Use `await ctx.report_progress(current, total)` for long-running tasks.
-- **Multi-message Prompts:** Return a list of `UserMessage`/`AssistantMessage` in prompt modules for richer LLM guidance.
-- **Server Composition/Proxy:** See example modules for mounting or proxying other MCP servers.
-
----
-
-## Requirements
-- Python 3.9+
-- `fastapi`, `fastmcp`, and dependencies installed in your environment.
-
----
-
 ## Contributing
 - Follow DRY, SOLID, and clean code principles.
 - Use type hints, write tests, and document your tools/resources.
@@ -99,3 +134,9 @@ model_context_protocol/
 ## Credits
 - Inspired by [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) and [The Clean Coder](https://www.oreilly.com/library/view/the-clean-coder/9780132542913/).
 - Built with ❤️ by Ty the Programmer.
+
+---
+
+## Requirements
+- Python 3.9+
+- `fastapi`, `fastmcp`, and dependencies installed in your environment.

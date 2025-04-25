@@ -29,8 +29,12 @@ except Exception as e:
 
 # --- Dynamically import all modules in specified subpackages for MCP registration ---
 def import_all_modules_recursively(package_path, package_name):
+    # Skip entire _examples folders
+    if os.path.basename(package_path).startswith("_examples"):
+        return
     for _, module_name, is_pkg in pkgutil.iter_modules([package_path]):
-        if module_name.startswith("_example") or module_name.startswith("_exmaple"):
+        # Skip modules or packages that start with _example or _examples
+        if module_name.startswith("_example") or module_name.startswith("_examples"):
             continue
         full_module_name = f"{package_name}.{module_name}"
         try:
