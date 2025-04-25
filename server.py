@@ -82,4 +82,8 @@ def get_app_version(ctx: Context = None) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    # Allow host/port override via environment variables
+    import os
+    host = os.getenv("MCP_SERVER_HOST", "0.0.0.0")
+    port = int(os.getenv("MCP_SERVER_PORT", "8000"))
+    mcp.run(host=host, port=port)
