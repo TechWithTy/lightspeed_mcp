@@ -1,7 +1,8 @@
 # Model Context Protocol (MCP) Integration Guide
 
 ## Overview
-This package demonstrates a robust integration between [FastAPI](https://fastapi.tiangolo.com/) and [FastMCP](https://github.com/typpo/fastmcp), enabling dynamic, modular, and scalable LLM/MCP workflows. It features automatic registration of tools, resources, and prompts for seamless extension.
+
+This package demonstrates a robust integration between [FastAPI](https://fastapi.techwithty.com/) and [FastMCP](https://github.com/typpo/fastmcp), enabling dynamic, modular, and scalable LLM/MCP workflows. It features automatic registration of tools, resources, and prompts for seamless extension.
 
 ---
 
@@ -57,6 +58,7 @@ app/
 ```
 
 **Why?**
+
 - The MCP server relies on relative imports to dynamically integrate with your FastAPI app.
 - Placing `model_context_protocol` at the app root ensures seamless OpenAPI and MCP integration.
 
@@ -78,9 +80,11 @@ app/
 ## How Integration Works
 
 ### 1. **FastAPI + FastMCP**
+
 - `server.py` imports your FastAPI app and passes it to `FastMCP.from_fastapi`, exposing all FastAPI endpoints as MCP tools/resources.
 
 ### 2. **Automatic Module Import**
+
 - At startup, `server.py` uses `pkgutil` and `importlib` to dynamically import **all** modules in:
   - `tools/image/`
   - `prompts/image/`
@@ -89,6 +93,7 @@ app/
 - **To add new functionality:** just drop a `.py` file with MCP-decorated functions into the appropriate folder—no need to edit `server.py`.
 
 ### 3. **Context, Image, and Advanced Features**
+
 - Tools/resources can use `Context` for:
   - Logging (`ctx.info`, `ctx.error`)
   - Progress reporting (`ctx.report_progress`)
@@ -98,6 +103,7 @@ app/
 ---
 
 ## Advanced Usage & Features
+
 - For advanced features, integration patterns, and full reproducibility examples, **see [`_docs/context_integration_examples.md`](./_docs/context_integration_examples.md)**.
 - Highlights include:
   - **LLM Sampling:** Use `await ctx.sample(...)` in tools/resources to request completions from the client LLM.
@@ -112,6 +118,7 @@ app/
 ## Example: Adding a New Tool
 
 1. Create a new file in `tools/image/`, e.g. `resize_tool.py`:
+
    ```python
    from fastmcp import mcp
 
@@ -121,22 +128,26 @@ app/
        # ... your logic here ...
        return new_path
    ```
+
 2. Restart your MCP server. The new tool will be auto-registered and available to all MCP clients.
 
 ---
 
 ## Contributing
+
 - Follow DRY, SOLID, and clean code principles.
 - Use type hints, write tests, and document your tools/resources.
 
 ---
 
 ## Credits
+
 - Inspired by [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) and [The Clean Coder](https://www.oreilly.com/library/view/the-clean-coder/9780132542913/).
 - Built with ❤️ by Ty the Programmer.
 
 ---
 
 ## Requirements
+
 - Python 3.9+
 - `fastapi`, `fastmcp`, and dependencies installed in your environment.
