@@ -16,13 +16,22 @@ from fastapi import FastAPI
 from fastmcp import Context, FastMCP, Image
 from PIL import Image as PILImage
 
-# Dynamically import your FastAPI app
+# Dynamically import your FastAPI app and block certain routes
 try:
     sys.path.insert(
         0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     )
     app_module = importlib.import_module("app.api.main")
     fastapi_app: FastAPI = app_module.app
+
+    # Remove/block routes starting with /system, /service, or /mcp_deny
+    blocked_prefixes = ("/system", "/service", "/mcp_deny")
+    routes_to_keep = []
+    for route in fastapi_app.router.routes:
+        if not any(str(route.path).startswith(prefix) for prefix in blocked_prefixes):
+            routes_to_keep.append(route)
+    fastapi_app.router.routes = routes_to_keep
+
 except Exception as e:
     fastapi_app = None
     print(f"Warning: Could not import FastAPI app for OpenAPI integration: {e}")
