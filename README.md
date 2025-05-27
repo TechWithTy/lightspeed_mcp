@@ -19,20 +19,50 @@ This package demonstrates a robust integration between [FastAPI](https://fastapi
 - **LLM/Context/Image Support:**
   - Tools/resources can use `Context` for logging, progress, and LLM sampling.
   - `Image` support for image data workflows.
+  
+- **Production-Ready**
+  - Containerized deployment with Docker
+  - Async/await support for high concurrency
+
+- ** Secure by Default**
+- All communications are secured with SSL/TLS by default. Ensure SSL is enabled in your deployment configuration (e.g., via a reverse proxy like NGINX or an HTTPS-enabled API gateway).-
+
+🚫 Blocked Routes
+To protect sensitive internal APIs, the following route prefixes are explicitly excluded and inaccessible from the public-facing API:
+
+/system
+
+/service
+
+/mcp_deny
+
+# Build and run
+docker build -t mcp-server -f app/mcp_server/docker/Dockerfile .
+docker run -d -p 8000:8000 --name mcp-server mcp-server
 
 ---
 
 ## Directory Structure
-
 ```
-model_context_protocol/
-├── server.py                 # Main MCP server, integrates FastAPI and MCP
-├── tools/            # All image-related MCP tools
-│       └── ...
-├── prompts/        # All image-related MCP prompts
-│       └── ...
-├── resources/                # All MCP resources
-│   └── ...
+mcp_server/
+├── _docs/                     # Comprehensive documentation
+│   ├── concepts/              # Core concepts and architecture
+│   ├── examples/              # Usage examples
+│   ├── quick-start/           # Getting started guides
+│   └── sdk/                   # SDK reference
+├── _tests/                    # Test suite
+├── context/                   # Context management
+│   └── _examples/             # Context usage examples
+├── docker/                    # Docker deployment files
+│   ├── Dockerfile             # Production Dockerfile
+│   └── mcp-server-ssl.conf    # SSL configuration
+├── prompts/                   # Prompt templates
+│   └── _examples/             # Example prompts
+├── resources/                 # MCP resources
+│   └── _examples/             # Example resources
+├── tools/                     # MCP tools
+│   └── _examples/             # Example tools
+└── server.py                  # Main MCP server entry point
 ```
 
 ---
