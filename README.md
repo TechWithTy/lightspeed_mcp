@@ -27,11 +27,9 @@ This package demonstrates a robust integration between [FastAPI](https://fastapi
 ```
 model_context_protocol/
 ├── server.py                 # Main MCP server, integrates FastAPI and MCP
-├── tools/
-│   └── image/                # All image-related MCP tools
+├── tools/            # All image-related MCP tools
 │       └── ...
-├── prompts/
-│   └── image/                # All image-related MCP prompts
+├── prompts/        # All image-related MCP prompts
 │       └── ...
 ├── resources/                # All MCP resources
 │   └── ...
@@ -86,8 +84,8 @@ app/
 ### 2. **Automatic Module Import**
 
 - At startup, `server.py` uses `pkgutil` and `importlib` to dynamically import **all** modules in:
-  - `tools/image/`
-  - `prompts/image/`
+  - `tools/`
+  - `prompts/`
   - `resources/`
 - This ensures that any MCP-decorated function (`@mcp.tool`, `@mcp.resource`, `@mcp.prompt`) in these modules is auto-registered with the MCP server.
 - **To add new functionality:** just drop a `.py` file with MCP-decorated functions into the appropriate folder—no need to edit `server.py`.
@@ -117,7 +115,7 @@ app/
 
 ## Example: Adding a New Tool
 
-1. Create a new file in `tools/image/`, e.g. `resize_tool.py`:
+1. Create a new file in `tools/tool.py`, e.g. `resize_tool.py`:
 
    ```python
    from fastmcp import mcp
@@ -143,7 +141,7 @@ app/
 ## Credits
 
 - Inspired by [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) and [The Clean Coder](https://www.oreilly.com/library/view/the-clean-coder/9780132542913/).
-- Built with ❤️ by Ty the Programmer.
+- Built by Ty the Programmer.
 
 ---
 
