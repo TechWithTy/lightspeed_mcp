@@ -141,7 +141,7 @@ app/
 ## Credits
 
 - Inspired by [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) and [The Clean Coder](https://www.oreilly.com/library/view/the-clean-coder/9780132542913/).
-- Built by Ty the Programmer.
+- Built by Ty the Programmer [Ty The Programmer](https://ty-dev-port.vercel.app//).
 
 ---
 
