@@ -15,13 +15,19 @@ from io import BytesIO
 from fastapi import FastAPI
 from fastmcp import Context, FastMCP, Image
 from PIL import Image as PILImage
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+import os
+os.environ["OTEL_SDK_DISABLED"] = "true"
+os.environ["FASTMCP_TELEMETRY_ENABLED"] = "false"
 
 # Dynamically import your FastAPI app and block certain routes
 try:
     sys.path.insert(
         0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     )
-    app_module = importlib.import_module("app.api.main")
+    app_module = importlib.import_module("app.main")
     fastapi_app: FastAPI = app_module.app
 
     # Remove/block routes starting with /system, /service, or /mcp_deny
@@ -61,10 +67,8 @@ import_all_modules_recursively(os.path.join(base_dir, "prompts"), "app.model_con
 import_all_modules_recursively(os.path.join(base_dir, "resources"), "app.model_context_protocol.resources")
 
 # Use FastMCP OpenAPI integration if FastAPI app is available
-if fastapi_app is not None:
-    mcp = FastMCP.from_fastapi(fastapi_app, name="Fast Supabase MCP Server")
-else:
-    mcp = FastMCP("Fast Supabase MCP Server")
+mcp = FastMCP.from_fastapi(fastapi_app, name="Fast Supabase MCP Server")
+
 
 
 @mcp.tool()
@@ -91,8 +95,10 @@ def get_app_version(ctx: Context = None) -> str:
 
 
 if __name__ == "__main__":
-    # Allow host/port override via environment variables
-    import os
-    host = os.getenv("MCP_SERVER_HOST", "0.0.0.0")
-    port = int(os.getenv("MCP_SERVER_PORT", "8000"))
-    mcp.run(host=host, port=port)
+    try:
+        mcp.run(transport="http", host="127.0.0.1", port=8000)
+        print("This should never print — server should block here.")
+    except Exception as e:
+        print(f"ERROR: Failed to start MCP server: {e}")
+        import traceback
+        traceback.print_exc()
