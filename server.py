@@ -13,7 +13,8 @@ import sys
 from io import BytesIO
 
 from fastapi import FastAPI
-from fastmcp import Context, FastMCP, Image
+from fastmcp import Context, FastMCP
+from fastmcp.utilities.types import Image
 from PIL import Image as PILImage
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -30,13 +31,47 @@ try:
     app_module = importlib.import_module("app.main")
     fastapi_app: FastAPI = app_module.app
 
-    # Remove/block routes starting with /system, /service, or /mcp_deny
-    blocked_prefixes = ("/system", "/service", "/mcp_deny")
+    # Remove/block sensitive routes for security
+    # Block authentication, user management, admin, debug, and other sensitive endpoints
+    blocked_prefixes = (
+        "/system", "/service", "/mcp_deny",  # Original blocks
+        "/login", "/auth",  # Authentication routes
+        "/users", "/user",  # User management routes  
+        "/password-recovery", "/reset-password",  # Password reset routes
+        "/debug", "/admin",  # Debug and admin routes
+        "/messaging",  # Internal messaging
+        "/metrics",  # Metrics endpoints
+        "/private",  # Private endpoints
+    )
+    
+    # Also block specific sensitive patterns
+    blocked_patterns = [
+        "signup", "password", "token", "admin", "debug", 
+        "superuser", "delete", "reset", "recovery"
+    ]
+    
     routes_to_keep = []
     for route in fastapi_app.router.routes:
-        if not any(str(route.path).startswith(prefix) for prefix in blocked_prefixes):
-            routes_to_keep.append(route)
+        route_path = str(route.path).lower()
+        
+        # Check blocked prefixes
+        if any(route_path.startswith(prefix) for prefix in blocked_prefixes):
+            continue
+            
+        # Check blocked patterns in the path
+        if any(pattern in route_path for pattern in blocked_patterns):
+            continue
+            
+        # Block HTTP methods that modify data for security
+        if hasattr(route, 'methods'):
+            if any(method in ['DELETE', 'PUT', 'PATCH'] for method in route.methods):
+                continue
+        
+        routes_to_keep.append(route)
+    
     fastapi_app.router.routes = routes_to_keep
+    print(f"MCP Server: Blocked {len(fastapi_app.router.routes) - len(routes_to_keep)} sensitive routes")
+    print(f"MCP Server: Keeping {len(routes_to_keep)} safe routes")
 
 except Exception as e:
     fastapi_app = None
@@ -67,7 +102,26 @@ import_all_modules_recursively(os.path.join(base_dir, "prompts"), "app.model_con
 import_all_modules_recursively(os.path.join(base_dir, "resources"), "app.model_context_protocol.resources")
 
 # Use FastMCP OpenAPI integration if FastAPI app is available
-mcp = FastMCP.from_fastapi(fastapi_app, name="Fast Supabase MCP Server")
+mcp = None
+if fastapi_app:
+    try:
+        # Try to rebuild models to ensure they're fully defined
+        print("Rebuilding Pydantic models for MCP server...")
+        from app.models import User, Item, UserCreate, ItemCreate, UserUpdate, ItemUpdate
+        for model in [User, Item, UserCreate, ItemCreate, UserUpdate, ItemUpdate]:
+            try:
+                model.model_rebuild()
+            except Exception as e:
+                print(f"Warning: Could not rebuild {model.__name__}: {e}")
+        
+        mcp = FastMCP.from_fastapi(fastapi_app, name="Fast Supabase MCP Server")
+        print("MCP Server integrated with FastAPI successfully")
+    except Exception as e:
+        print(f"Warning: Could not integrate FastAPI with MCP server: {e}")
+        print("Creating standalone MCP server...")
+        mcp = FastMCP(name="Fast Supabase MCP Server")
+else:
+    mcp = FastMCP(name="Fast Supabase MCP Server")
 
 
 
@@ -96,7 +150,13 @@ def get_app_version(ctx: Context = None) -> str:
 
 if __name__ == "__main__":
     try:
-        mcp.run(transport="http", host="127.0.0.1", port=8000)
+        # Use environment variables for host/port configuration
+        # For Render deployment, use 0.0.0.0 and PORT from environment
+        host = os.getenv("MCP_HOST", "0.0.0.0")
+        port = int(os.getenv("MCP_PORT", os.getenv("PORT", 8000)))
+        
+        print(f"Starting MCP server on {host}:{port}")
+        mcp.run(transport="http", host=host, port=port)
         print("This should never print — server should block here.")
     except Exception as e:
         print(f"ERROR: Failed to start MCP server: {e}")
