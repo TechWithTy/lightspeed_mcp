@@ -35,7 +35,7 @@ try:
     # Block authentication, user management, admin, debug, and other sensitive endpoints
     blocked_prefixes = (
         "/system", "/service", "/mcp_deny",  # Original blocks
-        "/login", "/auth",  # Authentication routes
+        # "/login", "/auth",  # Authentication routes - ALLOW for MCP testing
         "/users", "/user",  # User management routes  
         "/password-recovery", "/reset-password",  # Password reset routes
         "/debug", "/admin",  # Debug and admin routes
@@ -122,6 +122,58 @@ if fastapi_app:
         mcp = FastMCP(name="Fast Supabase MCP Server")
 else:
     mcp = FastMCP(name="Fast Supabase MCP Server")
+
+# Register all our custom tool modules
+try:
+    from app.model_context_protocol.tools.notes_tools import register_notes_tools
+    register_notes_tools(mcp)
+    print("Registered notes tools")
+except Exception as e:
+    print(f"Warning: Could not register notes tools: {e}")
+
+try:
+    from app.model_context_protocol.tools.tasks_tools import register_tasks_tools
+    register_tasks_tools(mcp)
+    print("Registered tasks tools")
+except Exception as e:
+    print(f"Warning: Could not register tasks tools: {e}")
+
+try:
+    from app.model_context_protocol.tools.categories_tools import register_categories_tools
+    register_categories_tools(mcp)
+    print("Registered categories tools")
+except Exception as e:
+    print(f"Warning: Could not register categories tools: {e}")
+
+try:
+    from app.model_context_protocol.tools.ai_tools import register_ai_tools
+    register_ai_tools(mcp)
+    print("Registered AI tools")
+except Exception as e:
+    print(f"Warning: Could not register AI tools: {e}")
+
+try:
+    from app.model_context_protocol.tools.productivity_tools import register_productivity_tools
+    register_productivity_tools(mcp)
+    print("Registered productivity tools")
+except Exception as e:
+    print(f"Warning: Could not register productivity tools: {e}")
+
+# Register prompts
+try:
+    from app.model_context_protocol.prompts.notes_prompts import register_notes_prompts
+    register_notes_prompts(mcp)
+    print("Registered notes prompts")
+except Exception as e:
+    print(f"Warning: Could not register notes prompts: {e}")
+
+# Register resources
+try:
+    from app.model_context_protocol.resources.notes_resources import register_notes_resources
+    register_notes_resources(mcp)
+    print("Registered notes resources")
+except Exception as e:
+    print(f"Warning: Could not register notes resources: {e}")
 
 
 
